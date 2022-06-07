@@ -89,11 +89,14 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 		}
 	}
 
+	flowDpsClient := upstream.Server{}
+
 	ret := &FlowAPIService{
 		upstreamProtocol:  protocolClients,
 		upstreamExecution: executorClients,
 		roundRobin:        0,
 		lock:              sync.Mutex{},
+		//flowDps:    flowDpsClient,
 	}
 	return ret, nil
 }
@@ -136,7 +139,6 @@ type FlowAPIService struct {
 	roundRobin        int
 	upstreamProtocol  []access.AccessAPIClient
 	upstreamExecution []access.AccessAPIClient
-	//upstream.Server
 }
 
 func (h *FlowAPIService) SetLocalAPI(local access.AccessAPIServer) {
