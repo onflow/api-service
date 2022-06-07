@@ -1,5 +1,8 @@
 module github.com/onflow/api-service/m/v2
 
+//TODO:
+//replace github.com/onflow/api-service => github.com/GetElastech
+
 go 1.18
 
 require (

@@ -18,6 +18,8 @@ import (
 	"github.com/onflow/flow-go/engine/access/rpc/backend"
 	"github.com/onflow/flow-go/model/flow"
 	"github.com/onflow/flow-go/utils/grpcutils"
+
+	upstream "github.com/onflow/api-service/m/v2/cmd/flow-dps-access"
 )
 
 func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNodeAddressAndPort flow.IdentityList, timeout time.Duration) (*FlowAPIService, error) {
@@ -134,6 +136,7 @@ type FlowAPIService struct {
 	roundRobin        int
 	upstreamProtocol  []access.AccessAPIClient
 	upstreamExecution []access.AccessAPIClient
+	//upstream.Server
 }
 
 func (h *FlowAPIService) SetLocalAPI(local access.AccessAPIServer) {
