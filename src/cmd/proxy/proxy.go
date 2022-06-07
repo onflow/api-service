@@ -15,6 +15,8 @@ import (
 	"github.com/onflow/flow-go/engine/access/rpc/backend"
 	"github.com/onflow/flow-go/model/flow"
 	"github.com/onflow/flow-go/utils/grpcutils"
+
+	upstream "github.com/onflow/api-service/m/v2/cmd/flow-dps-access"
 )
 
 func NewFlowAPIService(accessNodeAddressAndPort flow.IdentityList, timeout time.Duration) (*FlowAPIService, error) {
@@ -61,6 +63,7 @@ func NewFlowAPIService(accessNodeAddressAndPort flow.IdentityList, timeout time.
 
 type FlowAPIService struct {
 	access.AccessAPIServer
+	upstream.Server
 	lock       sync.Mutex
 	roundRobin int
 	upstream   []access.AccessAPIClient
