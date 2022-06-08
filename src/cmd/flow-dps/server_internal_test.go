@@ -15,7 +15,6 @@ import (
 	"github.com/onflow/flow/protobuf/go/flow/entities"
 
 	"github.com/optakt/flow-dps/models/dps"
-	"github.com/optakt/flow-dps/testing/mocks"
 )
 
 func TestNewServer(t *testing.T) {
