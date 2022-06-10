@@ -1,4 +1,4 @@
-package upstream
+package dpsclient
 
 import (
 	"github.com/onflow/cadence"

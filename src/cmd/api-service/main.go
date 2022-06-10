@@ -19,21 +19,29 @@ func main() {
 	// build dependencies and behavior
 	serviceBuilder.
 		Module("API Service", func(node *srv.ServiceConfig) error {
-			ids, err := serviceBuilder.BootstrapIdentities(serviceBuilder.UpstreamNodeAddresses, serviceBuilder.UpstreamNodePublicKeys)
+			protocols, err := serviceBuilder.BootstrapIdentities(serviceBuilder.ProtocolNodeAddresses, serviceBuilder.ProtocolNodePublicKeys)
 			if err != nil {
 				serviceBuilder.ServiceConfig.Logger.Info().Err(err)
 				return err
 			}
-			for _, id := range ids {
-				serviceBuilder.ServiceConfig.Logger.Info().Str("Upstream access/observer", id.Address).Msg("API Service client")
+			for _, id := range protocols {
+				serviceBuilder.ServiceConfig.Logger.Info().Str("Upstream protocol", id.Address).Msg("API Service client")
+			}
+			executors, err := serviceBuilder.BootstrapIdentities(serviceBuilder.ExecutionNodeAddresses, serviceBuilder.ExecutionNodePublicKeys)
+			if err != nil {
+				serviceBuilder.ServiceConfig.Logger.Info().Err(err)
+				return err
+			}
+			for _, id := range executors {
+				serviceBuilder.ServiceConfig.Logger.Info().Str("Upstream executor", id.Address).Msg("API Service client")
 			}
 
-			serviceBuilder.Api, err = proxy.NewFlowAPIService(ids, serviceBuilder.ApiTimeout)
+			serviceBuilder.Api, err = proxy.NewFlowAPIService(protocols, executors, serviceBuilder.ApiTimeout)
 			if err != nil {
 				serviceBuilder.ServiceConfig.Logger.Info().Err(err)
 				return err
 			}
-			serviceBuilder.ServiceConfig.Logger.Info().Str("cmd", fmt.Sprintf("%v", serviceBuilder.UpstreamNodeAddresses)).Msg("API Service started")
+			serviceBuilder.ServiceConfig.Logger.Info().Str("cmd", fmt.Sprintf("%v", serviceBuilder.ProtocolNodeAddresses)).Msg("API Service started")
 			return nil
 		}).
 		Module("RPC Engine", func(node *srv.ServiceConfig) error {

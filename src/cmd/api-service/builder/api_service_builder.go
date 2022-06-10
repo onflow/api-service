@@ -28,12 +28,14 @@ type FlowAPIServiceCmd struct {
 
 type FlowAPIServiceBuilder struct {
 	*service.FlowServiceBuilder
-	RpcConf                engine.Config
-	ApiTimeout             time.Duration
-	UpstreamNodeAddresses  []string
-	UpstreamNodePublicKeys []string
-	Api                    access.AccessAPIServer
-	RpcEngine              *engine.RPC
+	RpcConf                 engine.Config
+	ApiTimeout              time.Duration
+	ProtocolNodeAddresses   []string
+	ProtocolNodePublicKeys  []string
+	ExecutionNodeAddresses  []string
+	ExecutionNodePublicKeys []string
+	Api                     access.AccessAPIServer
+	RpcEngine               *engine.RPC
 }
 
 // Initialize Parse and print API Service command line arguments.
@@ -41,16 +43,21 @@ func (fsb *FlowAPIServiceBuilder) Initialize() error {
 	flags := &fsb.ServiceConfig.Flags
 	flags.StringVarP(&fsb.RpcConf.ListenAddr, "rpc-addr", "r", ":9000", "the address the GRPC server listens on")
 	flags.DurationVar(&fsb.ApiTimeout, "flow-api-timeout", 3*time.Second, "tcp timeout of the Flow API gRPC socket")
-	flags.StringSliceVar(&fsb.UpstreamNodeAddresses, "upstream-node-addresses", []string{}, "the network addresses of the bootstrap access nodes e.g. access-001.mainnet.flow.org:9653,access-002.mainnet.flow.org:9653")
-	flags.StringSliceVar(&fsb.UpstreamNodePublicKeys, "upstream-node-public-keys", []string{}, "the networking public key of the bootstrap access nodes (in the same order as the bootstrap node addresses) e.g. \"d57a5e9c5.....\",\"44ded42d....\"")
+	flags.StringSliceVar(&fsb.ProtocolNodeAddresses, "protocol-node-addresses", []string{}, "the network addresses of the bootstrap access nodes e.g. access-001.mainnet.flow.org:9653,access-002.mainnet.flow.org:9653")
+	flags.StringSliceVar(&fsb.ProtocolNodePublicKeys, "protocol-node-public-keys", []string{}, "the networking public key of the bootstrap access nodes (in the same order as the bootstrap node addresses) e.g. \"d57a5e9c5.....\",\"44ded42d....\"")
+	flags.StringSliceVar(&fsb.ExecutionNodeAddresses, "execution-node-addresses", []string{}, "the network addresses of the bootstrap access nodes e.g. access-001.mainnet.flow.org:9653,access-002.mainnet.flow.org:9653")
+	flags.StringSliceVar(&fsb.ExecutionNodePublicKeys, "execution-node-public-keys", []string{}, "the networking public key of the bootstrap access nodes (in the same order as the bootstrap node addresses) e.g. \"d57a5e9c5.....\",\"44ded42d....\"")
 
 	err := flags.Parse(os.Args[1:])
 	if err != nil {
 		fsb.ServiceConfig.Logger.Fatal().Err(err)
 	}
 	fsb.ServiceConfig.Logger.Info().
-		Str("upstream-node-addresses", fmt.Sprintf("%v", fsb.UpstreamNodeAddresses)).
-		Str("upstream-node-public-keys", fmt.Sprintf("%v", fsb.UpstreamNodePublicKeys))
+		Str("protocol-node-addresses", fmt.Sprintf("%v", fsb.ProtocolNodeAddresses)).
+		Str("protocol-node-public-keys", fmt.Sprintf("%v", fsb.ProtocolNodePublicKeys))
+	fsb.ServiceConfig.Logger.Info().
+		Str("execution-node-addresses", fmt.Sprintf("%v", fsb.ExecutionNodeAddresses)).
+		Str("execution-node-public-keys", fmt.Sprintf("%v", fsb.ExecutionNodePublicKeys))
 	return nil
 }
 

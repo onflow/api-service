@@ -35,7 +35,7 @@ type RPC struct {
 // New returns a new RPC engine.
 func New(log zerolog.Logger, config Config, proxy accessproto.AccessAPIServer) (*RPC, error) {
 	if proxy == nil {
-		return nil, fmt.Errorf("proxy argument not set")
+		return nil, fmt.Errorf("proxy not set")
 	}
 
 	log = log.With().Str("engine", "rpc").Logger()
@@ -55,7 +55,6 @@ func New(log zerolog.Logger, config Config, proxy accessproto.AccessAPIServer) (
 		),
 		config: config,
 		codec:  codec,
-		proxy:  proxy,
 	}
 
 	accessproto.RegisterAccessAPIServer(eng.server, proxy)
@@ -77,6 +76,67 @@ func (e *RPC) Done() <-chan struct{} {
 	return e.unit.Done(e.server.GracefulStop)
 }
 
+/*
+// SubmitLocal submits an event originating on the local node.
+func (e *RPC) SubmitLocal(event interface{}) {
+	e.unit.Launch(func() {
+		err := e.process(e.me.NodeID(), event)
+		if err != nil {
+			e.log.Error().Err(err).Msg("could not process submitted event")
+		}
+	})
+}
+
+// Submit submits the given event from the node with the given origin ID
+// for processing in a non-blocking manner. It returns instantly and logs
+// a potential processing error internally when done.
+func (e *RPC) Submit(channel network.Channel, originID flow.Identifier, event interface{}) {
+	e.unit.Launch(func() {
+		err := e.process(originID, event)
+		if err != nil {
+			e.log.Error().Err(err).Msg("could not process submitted event")
+		}
+	})
+}
+
+// ProcessLocal processes an event originating on the local node.
+func (e *RPC) ProcessLocal(event interface{}) error {
+	return e.unit.Do(func() error {
+		return e.process(e.me.NodeID(), event)
+	})
+}
+
+// Process processes the given event from the node with the given origin ID in
+// a blocking manner. It returns the potential processing error when done.
+func (e *RPC) Process(channel network.Channel, originID flow.Identifier, event interface{}) error {
+	return e.unit.Do(func() error {
+		return e.process(originID, event)
+	})
+}
+
+func (e *RPC) process(originID flow.Identifier, event interface{}) error {
+
+	// json encode the message into bytes
+	encodedMsg, err := e.codec.Encode(event)
+	if err != nil {
+		return fmt.Errorf("failed to encode message: %v", err)
+	}
+
+	// create a protobuf message
+	flowMessage := ghost.FlowMessage{
+		SenderID: originID[:],
+		Message:  encodedMsg,
+	}
+
+	// write it to the channel
+	select {
+	case e.messages <- flowMessage:
+	default:
+		return fmt.Errorf("dropping message since queue is full: %v", err)
+	}
+	return nil
+}
+*/
 // serve starts the gRPC server .
 //
 // When this function returns, the server is considered ready.
