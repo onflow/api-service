@@ -19,7 +19,7 @@ import (
 	"github.com/onflow/flow-go/model/flow"
 	"github.com/onflow/flow-go/utils/grpcutils"
 
-	upstream "github.com/onflow/api-service/m/v2/cmd/flow-dps"
+	//dpsclient "github.com/onflow/api-service/m/v2/cmd/flow-dps"
 )
 
 func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNodeAddressAndPort flow.IdentityList, timeout time.Duration) (*FlowAPIService, error) {
@@ -89,7 +89,7 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 		}
 	}
 
-	flowDpsClient := upstream.Server{}
+	//flowDpsClient := upstream.Server{}
 
 	ret := &FlowAPIService{
 		upstreamProtocol:  protocolClients,

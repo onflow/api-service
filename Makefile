@@ -66,8 +66,10 @@ docker-test-localnet-cleaned: docker-test-localnet
 .PHONY: docker-test-localnet
 docker-test-localnet: docker-run-localnet
 	docker run -d --name localnet_flow_api_service --rm -p 127.0.0.1:9500:9000 --network localnet_default \
-		--link access_1:access onflow.org/api-service go run -v -tags=relic cmd/api-service/main.go \
-		--upstream-node-addresses=access:9000 --upstream-node-public-keys=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa --rpc-addr=:9000
+	--link access_1:access onflow.org/api-service go run -v -tags=relic cmd/api-service/main.go \
+	--protocol-node-addresses=access:9000 --execution-node-addresses=access:9000 \
+	--protocol-node-public-keys=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \
+	--execution-node-public-keys=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa --rpc-addr=:9000
 	sleep 10
 	# To follow: docker logs -f localnet_flow_api_service
 	docker logs localnet_flow_api_service
