@@ -1,4 +1,4 @@
-package upstream
+package dpsclient
 
 import (
 	"context"
@@ -385,7 +385,7 @@ func (s *Server) ExecuteScriptAtBlockID(ctx context.Context, in *access.ExecuteS
 func (s *Server) ExecuteScriptAtBlockHeight(_ context.Context, in *access.ExecuteScriptAtBlockHeightRequest) (*access.ExecuteScriptResponse, error) {
 	var args []cadence.Value
 	for _, arg := range in.Arguments {
-		val, err := json.Decode(arg)
+		val, err := json.Decode(nil, arg)
 		if err != nil {
 			return nil, fmt.Errorf("could not decode script argument: %w", err)
 		}
