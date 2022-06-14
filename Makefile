@@ -1,4 +1,8 @@
 
+# All
+.PHONY: all
+all: docker-test-e2e docker-build-test
+
 # Build dependencies
 .PHONY: install-tools
 install-tools:
@@ -60,7 +64,7 @@ docker-test-e2e: docker-test-localnet-cleaned
 # Stop localnet Flow tests
 .PHONY: docker-test-localnet-cleaned
 docker-test-localnet-cleaned: docker-test-localnet
-	bash -c 'cd upstream/integration/localnet && make stop'
+	bash -c 'cd upstream/flow-go/integration/localnet && make stop'
 
 # Run API service attached to localnet in Docker
 .PHONY: docker-test-localnet
@@ -82,8 +86,8 @@ docker-test-localnet: docker-run-localnet
 .PHONY: docker-run-localnet
 docker-run-localnet: docker-build
 	# We might want to use testnet
-	git clone https://github.com/onflow/flow-go.git upstream || true
+	git clone https://github.com/onflow/flow-go.git upstream/flow-go || true
 	# git checkout e4b4451c233628969ee321dfd5c0b19a0152fe79
-	bash -c 'cd upstream && make install-tools'
-	bash -c 'cd upstream/integration/localnet && make init && make start'
+	bash -c 'cd upstream/flow-go && make install-tools'
+	bash -c 'cd upstream/flow-go/integration/localnet && make init && make start'
 
