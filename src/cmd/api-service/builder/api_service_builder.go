@@ -48,16 +48,19 @@ func (fsb *FlowAPIServiceBuilder) Initialize() error {
 	flags.StringSliceVar(&fsb.ExecutionNodeAddresses, "execution-node-addresses", []string{}, "the network addresses of the bootstrap access nodes e.g. access-001.mainnet.flow.org:9653,access-002.mainnet.flow.org:9653")
 	flags.StringSliceVar(&fsb.ExecutionNodePublicKeys, "execution-node-public-keys", []string{}, "the networking public key of the bootstrap access nodes (in the same order as the bootstrap node addresses) e.g. \"d57a5e9c5.....\",\"44ded42d....\"")
 
-	err := flags.Parse(os.Args[1:])
+	// This one just prints the flags
+	err := fsb.FlowServiceBuilder.ParseAndPrintFlags()
 	if err != nil {
 		fsb.ServiceConfig.Logger.Fatal().Err(err)
 	}
+
 	fsb.ServiceConfig.Logger.Info().
 		Str("protocol-node-addresses", fmt.Sprintf("%v", fsb.ProtocolNodeAddresses)).
 		Str("protocol-node-public-keys", fmt.Sprintf("%v", fsb.ProtocolNodePublicKeys))
 	fsb.ServiceConfig.Logger.Info().
 		Str("execution-node-addresses", fmt.Sprintf("%v", fsb.ExecutionNodeAddresses)).
 		Str("execution-node-public-keys", fmt.Sprintf("%v", fsb.ExecutionNodePublicKeys))
+
 	return nil
 }
 

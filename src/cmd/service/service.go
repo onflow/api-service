@@ -42,21 +42,26 @@ type FlowServiceBuilder struct {
 	modules       []namedModuleFunc // Modules are dependencies built at startup
 }
 
+// ParseAndPrintFlags parses and prints command line configuration parameters.
 func (fsb *FlowServiceBuilder) ParseAndPrintFlags() error {
-	// parse configuration parameters
-	pflag.Parse()
+	flags := &fsb.ServiceConfig.Flags
+
+	// parse all flags
+	err := flags.Parse(os.Args[1:])
+	if err != nil {
+		fsb.ServiceConfig.Logger.Fatal().Err(err)
+	}
 
 	// print all flags
-	log := fsb.ServiceConfig.Logger.Info()
-
-	pflag.VisitAll(func(flag *pflag.Flag) {
-		log = log.Str(flag.Name, flag.Value.String())
+	flags.VisitAll(func(flag *pflag.Flag) {
+		fsb.ServiceConfig.Logger.Info().Str(flag.Name, flag.Value.String()).Msg("flags loaded")
 	})
 
-	fsb.ServiceConfig.Logger.Info().Msg("flags loaded")
 	return nil
 }
 
+// Build runs all module callbacks.
+// This is done once at startup.
 func (fsb *FlowServiceBuilder) Build() (*FlowService, error) {
 	// build all modules
 	for _, f := range fsb.modules {
@@ -70,6 +75,8 @@ func (fsb *FlowServiceBuilder) Build() (*FlowService, error) {
 }
 
 // Module enables setting up dependencies of the engine with the builder context.
+// The function is called once when the service starts.
+// It is supposed to do its job and finish before components start.
 func (fsb *FlowServiceBuilder) Module(name string, f BuilderFunc) *FlowServiceBuilder {
 	fsb.modules = append(fsb.modules, namedModuleFunc{
 		fn:   f,
@@ -88,6 +95,7 @@ func (fsb *FlowServiceBuilder) Component(name string, f BuilderFunc) *FlowServic
 	return fsb
 }
 
+// Start starts each component and errors out if one fails
 func (fsc *ServiceConfig) Start() error {
 	// start all components
 	for _, f := range fsc.Components {
