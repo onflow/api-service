@@ -1,10 +1,10 @@
 # NOTE: Must be run in the context of the repo's root directory
 
 ## (1) Download a suitable version of Go
-# FIX: We use 1.17 due to unsupported modules
+# FIX: We use 1.18 due to unsupported modules
 # FIX: github.com/lucas-clemente/quic-go@v0.24.0/internal/qtls/go118.go:6:13:
 # FIX:   cannot use "quic-go doesn't build on Go 1.18 yet."
-FROM golang:1.17 AS build-setup
+FROM golang:1.18 AS build-setup
 
 # Add optional items like apt install -y make cmake gcc g++
 RUN apt update && apt install -y cmake make gcc g++
@@ -54,7 +54,7 @@ COPY --from=build-env /app/main /app/main
 CMD ["go", "run", "-tags=relic", "cmd/api-service/main.go"]
 
 ## (6) Add the statically linked binary to a distroless image
-FROM golang:1.17 as production-small
+FROM golang:1.18 as production-small
 
 RUN rm -rf /go
 RUN rm -rf /app
@@ -63,7 +63,7 @@ COPY --from=production /app/main /bin/main
 
 CMD ["/bin/main"]
 
-FROM golang:1.17 as build-cli-env
+FROM golang:1.18 as build-cli-env
 
 RUN git clone https://github.com/onflow/flow-cli.git /flow-cli
 WORKDIR /flow-cli
@@ -88,7 +88,7 @@ RUN VERSION=v0.34.0 \
 
 RUN ./main version
 
-FROM golang:1.17 as flow-cli
+FROM golang:1.18 as flow-cli
 
 RUN rm -rf /go
 RUN rm -rf /app
