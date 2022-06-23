@@ -3,15 +3,16 @@ package builder
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/onflow/api-service/m/v2/cmd/engine"
-	"github.com/onflow/api-service/m/v2/cmd/service"
-	"github.com/onflow/flow-go/model/flow"
-	"github.com/onflow/flow/protobuf/go/flow/access"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/onflow/api-service/m/v2/cmd/engine"
+	"github.com/onflow/api-service/m/v2/cmd/service"
+	"github.com/onflow/flow-go/model/flow"
+	"github.com/onflow/flow/protobuf/go/flow/access"
 )
 
 func NewFlowAPIServiceBuilder() *FlowAPIServiceBuilder {
@@ -34,6 +35,9 @@ type FlowAPIServiceBuilder struct {
 	ProtocolNodePublicKeys  []string
 	ExecutionNodeAddresses  []string
 	ExecutionNodePublicKeys []string
+	FlowDpsNodeAddress      string
+	FlowDpsHostUrl          string
+	FlowDpsMaxCacheSize     uint64
 	Api                     access.AccessAPIServer
 	RpcEngine               *engine.RPC
 }
@@ -47,6 +51,9 @@ func (fsb *FlowAPIServiceBuilder) Initialize() error {
 	flags.StringSliceVar(&fsb.ProtocolNodePublicKeys, "protocol-node-public-keys", []string{}, "the networking public key of the bootstrap access nodes (in the same order as the bootstrap node addresses) e.g. \"d57a5e9c5.....\",\"44ded42d....\"")
 	flags.StringSliceVar(&fsb.ExecutionNodeAddresses, "execution-node-addresses", []string{}, "the network addresses of the bootstrap access nodes e.g. access-001.mainnet.flow.org:9653,access-002.mainnet.flow.org:9653")
 	flags.StringSliceVar(&fsb.ExecutionNodePublicKeys, "execution-node-public-keys", []string{}, "the networking public key of the bootstrap access nodes (in the same order as the bootstrap node addresses) e.g. \"d57a5e9c5.....\",\"44ded42d....\"")
+	flags.StringVarP(&fsb.FlowDpsNodeAddress, "flow-dps-node-address", "a", "127.0.0.1:5006", "address to serve Access API on")
+	flags.StringVarP(&fsb.FlowDpsHostUrl, "flow-dps-host-url", "d", "127.0.0.1:5005", "host URL for Flow DPS API endpoints")
+	flags.Uint64Var(&fsb.FlowDpsMaxCacheSize, "cache-size", 1_000_000_000, "maximum cache size for register reads in flow-dps in bytes")
 
 	// This one just prints the flags
 	err := fsb.FlowServiceBuilder.ParseAndPrintFlags()
@@ -60,6 +67,9 @@ func (fsb *FlowAPIServiceBuilder) Initialize() error {
 	fsb.ServiceConfig.Logger.Info().
 		Str("execution-node-addresses", fmt.Sprintf("%v", fsb.ExecutionNodeAddresses)).
 		Str("execution-node-public-keys", fmt.Sprintf("%v", fsb.ExecutionNodePublicKeys))
+	fsb.ServiceConfig.Logger.Info().
+		Str("flow-dps-node-address", fmt.Sprintf("%v", fsb.FlowDpsNodeAddress)).
+		Str("flow-dps-host-url", fmt.Sprintf("%v", fsb.FlowDpsHostUrl))
 
 	return nil
 }
