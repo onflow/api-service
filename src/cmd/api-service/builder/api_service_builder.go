@@ -38,6 +38,7 @@ type FlowAPIServiceBuilder struct {
 	FlowDpsNodeAddress      string
 	FlowDpsHostUrl          string
 	FlowDpsMaxCacheSize     uint64
+	FlosDpsFlagLevel        string
 	Api                     access.AccessAPIServer
 	RpcEngine               *engine.RPC
 }
@@ -54,6 +55,7 @@ func (fsb *FlowAPIServiceBuilder) Initialize() error {
 	flags.StringVarP(&fsb.FlowDpsNodeAddress, "flow-dps-node-address", "a", "127.0.0.1:5006", "address to serve Access API on")
 	flags.StringVarP(&fsb.FlowDpsHostUrl, "flow-dps-host-url", "d", "127.0.0.1:5005", "host URL for Flow DPS API endpoints")
 	flags.Uint64Var(&fsb.FlowDpsMaxCacheSize, "cache-size", 1_000_000_000, "maximum cache size for register reads in flow-dps in bytes")
+	flags.StringVarP(&fsb.FlosDpsFlagLevel, "level", "l", "info", "log output level")
 
 	// This one just prints the flags
 	err := fsb.FlowServiceBuilder.ParseAndPrintFlags()

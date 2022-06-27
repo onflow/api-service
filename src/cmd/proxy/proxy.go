@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"strings"
 	"sync"
@@ -117,6 +118,8 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 	pflag.Uint64Var(&flagCache, "cache-size", 1_000_000_000, "maximum cache size for register reads in bytes")
 	pflag.StringVarP(&flagAddress, "address", "a", "127.0.0.1:5006", "address to serve Access API on")
 
+	pflag.Parse()
+
 	// Initialize codec.
 	codec := zbor.NewCodec()
 
@@ -160,6 +163,39 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 		log.Error().Str("address", flagAddress).Err(err).Msg("could not listen")
 		return nil, errors.New("Failed to initialize listener")
 	}
+
+	done := make(chan struct{})
+	failed := make(chan struct{})
+	go func() {
+		log.Info().Msg("Flow-DPS Access API Server starting")
+		access.RegisterAccessAPIServer(gsvr, dpsServer)
+		err = gsvr.Serve(listener)
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Warn().Err(err).Msg("Flow-DPS Access API Server failed")
+			close(failed)
+		} else {
+			close(done)
+		}
+		log.Info().Msg("Flow-DPS Access API Server stopped")
+	}()
+
+	// Signal catching for clean shutdown.
+	sig := make(chan os.Signal, 1)
+
+	select {
+	case <-sig:
+		log.Info().Msg("Flow-DPS Access API Server stopping")
+	case <-done:
+		log.Info().Msg("Flow-DPS Access API Server done")
+	case <-failed:
+		log.Warn().Msg("Flow-DPS Access API Server aborted")
+		return nil, errors.New("Server aborted")
+	}
+	go func() {
+		<-sig
+		log.Warn().Msg("forcing exit")
+		os.Exit(1)
+	}()
 
 	ret := &FlowAPIService{
 		dpsAccess:         dpsServer,
