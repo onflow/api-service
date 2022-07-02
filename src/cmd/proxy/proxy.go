@@ -3,7 +3,10 @@ package proxy
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -14,12 +17,21 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/onflow/flow/protobuf/go/flow/access"
+	"github.com/GetElastech/flow-dps/codec/zbor"
+	"github.com/GetElastech/flow-dps/service/invoker"
+	"github.com/rs/zerolog"
 
 	"github.com/onflow/flow-go/engine/access/rpc/backend"
 	"github.com/onflow/flow-go/model/flow"
 	"github.com/onflow/flow-go/utils/grpcutils"
 
-	//dpsclient "github.com/onflow/api-service/m/v2/cmd/flow-dps"
+	grpczerolog "github.com/grpc-ecosystem/go-grpc-middleware/providers/zerolog/v2"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/tags"
+	dpsclient "github.com/onflow/api-service/m/v2/cmd/flow-dps"
+	accessApi "github.com/GetElastech/flow-dps-access/api"
+	dpsApi "github.com/GetElastech/flow-dps/api/dps"
+	"github.com/spf13/pflag"
 )
 
 func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNodeAddressAndPort flow.IdentityList, timeout time.Duration) (*FlowAPIService, error) {
@@ -89,14 +101,74 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 		}
 	}
 
-	//flowDpsClient := upstream.Server{}
+	dpsClient := dpsclient.Server{}
+
+	// Logger initialization.
+	zerolog.TimestampFunc = func() time.Time { return time.Now().UTC() }
+	log := zerolog.New(os.Stderr).With().Timestamp().Logger().Level(zerolog.DebugLevel)
+
+	// Command line parameter initialization.
+	var (
+		flagAddress string
+		flagDPS     string
+		flagCache   uint64
+		// flagLevel   string
+	)
+	pflag.StringVarP(&flagDPS, "dps", "d", "127.0.0.1:5005", "host URL for DPS API endpoint")
+	pflag.Uint64Var(&flagCache, "cache-size", 1_000_000_000, "maximum cache size for register reads in bytes")
+	pflag.StringVarP(&flagAddress, "address", "a", "127.0.0.1:5006", "address to serve Access API on")
+
+	// Initialize codec.
+	codec := zbor.NewCodec()
+
+	// GRPC API initialization.
+	opts := []logging.Option{
+		logging.WithLevels(logging.DefaultServerCodeToLevel),
+	}
+
+	gsvr := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			tags.UnaryServerInterceptor(),
+			logging.UnaryServerInterceptor(grpczerolog.InterceptorLogger(log), opts...),
+		),
+		grpc.ChainStreamInterceptor(
+			tags.StreamServerInterceptor(),
+			logging.StreamServerInterceptor(grpczerolog.InterceptorLogger(log), opts...),
+		),
+	)
+
+	// Initialize the API client.
+	conn, err := grpc.Dial(flagDPS, grpc.WithInsecure())
+	if err != nil {
+		log.Error().Str("dps", flagDPS).Err(err).Msg("could not dial API host")
+		return nil, errors.New("Failed to initialize grpc client connection")
+	}
+	defer conn.Close()
+
+	client := dpsApi.NewAPIClient(conn)
+	index := dpsApi.IndexFromAPI(client, codec)
+
+	invoke, err := invoker.New(index, invoker.WithCacheSize(flagCache))
+	if err != nil {
+		log.Error().Err(err).Msg("could not initialize script invoker")
+		return nil, errors.New("error initializing script invoker")
+	}
+
+	dpsServer := accessApi.NewServer(index, codec, invoke)
+
+	listener, err := net.Listen("tcp", flagAddress)
+	if err != nil {
+		log.Error().Str("address", flagAddress).Err(err).Msg("could not listen")
+		return nil, errors.New("Failed to initialize listener")
+	}
 
 	ret := &FlowAPIService{
+		dpsAccess:         dpsServer,
 		upstreamProtocol:  protocolClients,
 		upstreamExecution: executorClients,
 		roundRobin:        0,
 		lock:              sync.Mutex{},
-		//flowDps:    flowDpsClient,
+		dpsListener:       listener,
 	}
 	return ret, nil
 }
@@ -135,10 +207,12 @@ func BootstrapIdentities(addresses []string, keys []string) (flow.IdentityList, 
 
 type FlowAPIService struct {
 	access.AccessAPIServer
+	dpsAccess         access.AccessAPIServer
 	lock              sync.Mutex
 	roundRobin        int
 	upstreamProtocol  []access.AccessAPIClient
 	upstreamExecution []access.AccessAPIClient
+	dpsListener       net.Listener
 }
 
 func (h *FlowAPIService) SetLocalAPI(local access.AccessAPIServer) {
