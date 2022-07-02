@@ -16,21 +16,20 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 
-	"github.com/onflow/flow/protobuf/go/flow/access"
 	"github.com/GetElastech/flow-dps/codec/zbor"
 	"github.com/GetElastech/flow-dps/service/invoker"
+	"github.com/onflow/flow/protobuf/go/flow/access"
 	"github.com/rs/zerolog"
 
 	"github.com/onflow/flow-go/engine/access/rpc/backend"
 	"github.com/onflow/flow-go/model/flow"
 	"github.com/onflow/flow-go/utils/grpcutils"
 
+	accessApi "github.com/GetElastech/flow-dps-access/api"
+	dpsApi "github.com/GetElastech/flow-dps/api/dps"
 	grpczerolog "github.com/grpc-ecosystem/go-grpc-middleware/providers/zerolog/v2"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/tags"
-	dpsclient "github.com/onflow/api-service/m/v2/cmd/flow-dps"
-	accessApi "github.com/GetElastech/flow-dps-access/api"
-	dpsApi "github.com/GetElastech/flow-dps/api/dps"
 	"github.com/spf13/pflag"
 )
 
@@ -101,7 +100,7 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 		}
 	}
 
-	dpsClient := dpsclient.Server{}
+	//dpsClient := dpsclient.Server{}
 
 	// Logger initialization.
 	zerolog.TimestampFunc = func() time.Time { return time.Now().UTC() }
@@ -126,7 +125,7 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 		logging.WithLevels(logging.DefaultServerCodeToLevel),
 	}
 
-	gsvr := grpc.NewServer(
+	_ = grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			tags.UnaryServerInterceptor(),
 			logging.UnaryServerInterceptor(grpczerolog.InterceptorLogger(log), opts...),
@@ -207,7 +206,7 @@ func BootstrapIdentities(addresses []string, keys []string) (flow.IdentityList, 
 
 type FlowAPIService struct {
 	access.AccessAPIServer
-	dpsAccess         access.AccessAPIServer
+	dpsAccess         *accessApi.Server
 	lock              sync.Mutex
 	roundRobin        int
 	upstreamProtocol  []access.AccessAPIClient
