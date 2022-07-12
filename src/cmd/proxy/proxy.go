@@ -168,7 +168,8 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 	failed := make(chan struct{})
 	go func() {
 		log.Info().Msg("Flow-DPS Access API Server starting")
-		//access.RegisterAccessAPIServer(gsvr, dpsServer)
+		//dpsApi.RegisterAPIServer(gsvr, dpsServer)
+		access.RegisterAccessAPIServer(gsvr, dpsServer)
 		err = gsvr.Serve(listener)
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Warn().Err(err).Msg("Flow-DPS Access API Server failed")
