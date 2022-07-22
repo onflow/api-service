@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"net/http"
 	"os"
 	"strings"
 	"sync"
@@ -26,11 +25,8 @@ import (
 	"github.com/onflow/flow-go/model/flow"
 	"github.com/onflow/flow-go/utils/grpcutils"
 
+	accessApi "github.com/GetElastech/flow-dps-access/api"
 	dpsApi "github.com/GetElastech/flow-dps/api/dps"
-	grpczerolog "github.com/grpc-ecosystem/go-grpc-middleware/providers/zerolog/v2"
-	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
-	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/tags"
-	accessApi "github.com/onflow/api-service/m/v2/cmd/flow-dps/server"
 	"github.com/spf13/pflag"
 )
 
@@ -120,26 +116,10 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 
 	pflag.Parse()
 
-	// Initialize codec.
+	//Initialize codec.
 	codec := zbor.NewCodec()
 
-	// GRPC API initialization.
-	opts := []logging.Option{
-		logging.WithLevels(logging.DefaultServerCodeToLevel),
-	}
-
-	gsvr := grpc.NewServer(
-		grpc.ChainUnaryInterceptor(
-			tags.UnaryServerInterceptor(),
-			logging.UnaryServerInterceptor(grpczerolog.InterceptorLogger(log), opts...),
-		),
-		grpc.ChainStreamInterceptor(
-			tags.StreamServerInterceptor(),
-			logging.StreamServerInterceptor(grpczerolog.InterceptorLogger(log), opts...),
-		),
-	)
-
-	// Initialize the API client.
+	//Initialize the API client.
 	conn, err := grpc.Dial(flagDPS, grpc.WithInsecure())
 	if err != nil {
 		log.Error().Str("dps", flagDPS).Err(err).Msg("could not dial API host")
@@ -163,40 +143,6 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 		log.Error().Str("address", flagAddress).Err(err).Msg("could not listen")
 		return nil, errors.New("Failed to initialize listener")
 	}
-
-	done := make(chan struct{})
-	failed := make(chan struct{})
-	go func() {
-		log.Info().Msg("Flow-DPS Access API Server starting")
-		//dpsApi.RegisterAPIServer(gsvr, dpsServer)
-		access.RegisterAccessAPIServer(gsvr, dpsServer)
-		err = gsvr.Serve(listener)
-		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Warn().Err(err).Msg("Flow-DPS Access API Server failed")
-			close(failed)
-		} else {
-			close(done)
-		}
-		log.Info().Msg("Flow-DPS Access API Server stopped")
-	}()
-
-	// Signal catching for clean shutdown.
-	sig := make(chan os.Signal, 1)
-
-	select {
-	case <-sig:
-		log.Info().Msg("Flow-DPS Access API Server stopping")
-	case <-done:
-		log.Info().Msg("Flow-DPS Access API Server done")
-	case <-failed:
-		log.Warn().Msg("Flow-DPS Access API Server aborted")
-		return nil, errors.New("Server aborted")
-	}
-	go func() {
-		<-sig
-		log.Warn().Msg("forcing exit")
-		os.Exit(1)
-	}()
 
 	ret := &FlowAPIService{
 		dpsAccess:         dpsServer,
