@@ -26,11 +26,11 @@ import (
 	"github.com/onflow/flow-go/model/flow"
 	"github.com/onflow/flow-go/utils/grpcutils"
 
-	accessApi "github.com/GetElastech/flow-dps-access/api"
 	dpsApi "github.com/GetElastech/flow-dps/api/dps"
 	grpczerolog "github.com/grpc-ecosystem/go-grpc-middleware/providers/zerolog/v2"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/tags"
+	accessApi "github.com/onflow/api-service/m/v2/cmd/flow-dps/server"
 	"github.com/spf13/pflag"
 )
 
