@@ -545,8 +545,14 @@ func (s *Server) GetLatestProtocolStateSnapshot(ctx context.Context, in *access.
 	return nil, errors.New("GetLatestProtocolSnapshot is not implemented by the Flow DPS API; please use the Flow Access API on a Flow access node directly")
 }
 
-// GetLatestProtocolStateSnapshot is not implemented.
-// See https://docs.onflow.org/access-api/#getransactionResultByIndex
-func (s *Server) GetTransactionResultByIndex(ctx context.Context, in *access.GetTransactionByIndexRequest) (*access.TransactionResultResponse, error) {
+// GetTransactionResultsByIndex is not implemented.
+
+func (c *Server) GetTransactionResultByIndex(ctx context.Context, in *access.GetTransactionByIndexRequest) (*access.TransactionResultResponse, error) {
+	return nil, errors.New("GetTransactionResultByIndex is not implemented by the Flow DPS API; please use the Flow Access API on a Flow access node directly")
+}
+
+// GetTransactionResultsByBlockID is not implemented.
+// See https://docs.onflow.org/access-api/#gettransactionresultsbylockID
+func (s *Server) GetTransactionResultsByBlockID(ctx context.Context, in *access.GetTransactionsByBlockIDRequest) (*access.TransactionResultResponse, error) {
 	return nil, errors.New("GetTransactionResultByIndex is not implemented by the Flow DPS API; please use the Flow Access API on a Flow access node directly")
 }
