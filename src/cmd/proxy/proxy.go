@@ -112,7 +112,6 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 	)
 	pflag.StringVarP(&flagDPS, "dps", "d", "127.0.0.1:5005", "host URL for DPS API endpoint")
 	pflag.Uint64Var(&flagCache, "cache-size", 1_000_000_000, "maximum cache size for register reads in bytes")
-	pflag.StringVarP(&flagAddress, "address", "a", "127.0.0.1:5006", "address to serve Access API on")
 
 	pflag.Parse()
 
