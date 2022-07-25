@@ -41,12 +41,6 @@ func NewServer(index dps.Reader, codec dps.Codec, invoker Invoker) *Server {
 	return &s
 }
 
-// Ping implements the Ping endpoint from the Flow Access API.
-// See https://docs.onflow.org/access-api/#ping
-func (s *Server) Ping(_ context.Context, _ *access.PingRequest) (*access.PingResponse, error) {
-	return &access.PingResponse{}, nil
-}
-
 // GetLatestBlockHeader implements the GetLatestBlockHeader endpoint from the Flow Access API.
 // See https://docs.onflow.org/access-api/#getlatestblockheader
 func (s *Server) GetLatestBlockHeader(ctx context.Context, _ *access.GetLatestBlockHeaderRequest) (*access.BlockHeaderResponse, error) {
