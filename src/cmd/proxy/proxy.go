@@ -25,7 +25,7 @@ import (
 	"github.com/onflow/flow-go/model/flow"
 	"github.com/onflow/flow-go/utils/grpcutils"
 
-	accessApi "github.com/GetElastech/flow-dps-access/api"
+	flowDpsAccess "github.com/GetElastech/flow-dps-access/api"
 	dpsApi "github.com/GetElastech/flow-dps/api/dps"
 	"github.com/spf13/pflag"
 )
@@ -97,8 +97,6 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 		}
 	}
 
-	//dpsClient := dpsclient.Server{}
-
 	// Logger initialization.
 	zerolog.TimestampFunc = func() time.Time { return time.Now().UTC() }
 	log := zerolog.New(os.Stderr).With().Timestamp().Logger().Level(zerolog.DebugLevel)
@@ -135,7 +133,7 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 		return nil, errors.New("error initializing script invoker")
 	}
 
-	dpsServer := accessApi.NewServer(index, codec, invoke)
+	flowDpsAccessServer := flowDpsAccess.NewServer(index, codec, invoke)
 
 	listener, err := net.Listen("tcp", flagAddress)
 	if err != nil {
@@ -144,7 +142,7 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 	}
 
 	ret := &FlowAPIService{
-		dpsAccess:         dpsServer,
+		dpsAccess:         flowDpsAccessServer,
 		upstreamProtocol:  protocolClients,
 		upstreamExecution: executorClients,
 		roundRobin:        0,
@@ -188,7 +186,7 @@ func BootstrapIdentities(addresses []string, keys []string) (flow.IdentityList, 
 
 type FlowAPIService struct {
 	access.AccessAPIServer
-	dpsAccess         *accessApi.Server
+	dpsAccess         *flowDpsAccess.Server
 	lock              sync.Mutex
 	roundRobin        int
 	upstreamProtocol  []access.AccessAPIClient
