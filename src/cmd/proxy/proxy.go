@@ -237,6 +237,7 @@ func (h *FlowAPIService) Ping(context context.Context, req *access.PingRequest) 
 }
 
 func (h *FlowAPIService) GetLatestBlockHeader(context context.Context, req *access.GetLatestBlockHeaderRequest) (*access.BlockHeaderResponse, error) {
+	// This is a passthrough request
 	return h.flowDpsAccess.GetLatestBlockHeader(context, req)
 }
 
