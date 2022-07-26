@@ -103,11 +103,11 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 
 	// Command line parameter initialization.
 	var (
-		flagAddress string
-		flagDPS     string
-		flagCache   uint64
+		flagDpsListenPort string
+		flagHostDpsPort   string
+		flagCache         uint64
 	)
-	pflag.StringVarP(&flagDPS, "dps", "d", "127.0.0.1:5005", "host URL for DPS API endpoint")
+	pflag.StringVarP(&flagHostDpsPort, "dps", "d", "127.0.0.1:5005", "host port for DPS API endpoint")
 	pflag.Uint64Var(&flagCache, "cache-size", 1_000_000_000, "maximum cache size for register reads in bytes")
 
 	pflag.Parse()
@@ -116,9 +116,9 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 	codec := zbor.NewCodec()
 
 	//Initialize the API client.
-	conn, err := grpc.Dial(flagDPS, grpc.WithInsecure())
+	conn, err := grpc.Dial(flagHostDpsPort, grpc.WithInsecure())
 	if err != nil {
-		log.Error().Str("dps", flagDPS).Err(err).Msg("could not dial API host")
+		log.Error().Str("dps", flagHostDpsPort).Err(err).Msg("could not dial API host")
 		return nil, errors.New("Failed to initialize grpc client connection")
 	}
 	defer conn.Close()
@@ -134,9 +134,9 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 
 	flowDpsAccessServer := flowDpsAccess.NewServer(index, codec, invoke)
 
-	listener, err := net.Listen("tcp", flagAddress)
+	listener, err := net.Listen("tcp", flagDpsListenPort)
 	if err != nil {
-		log.Error().Str("address", flagAddress).Err(err).Msg("could not listen")
+		log.Error().Str("address", flagDpsListenPort).Err(err).Msg("could not listen")
 		return nil, errors.New("Failed to initialize listener")
 	}
 
