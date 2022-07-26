@@ -9,8 +9,6 @@ require (
 	github.com/GetElastech/flow-dps v1.4.9-0.20220701214256-b6ea519c29bb
 	github.com/GetElastech/flow-dps-access v0.0.0-20220701221556-10ddedc521f5
 	github.com/golang/protobuf v1.5.2
-	github.com/grpc-ecosystem/go-grpc-middleware/providers/zerolog/v2 v2.0.0-rc.2
-	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.0-rc.2
 	github.com/onflow/cadence v0.21.3-0.20220513161637-08b93d4bb7b9
 	github.com/onflow/flow-go v0.26.0
 	github.com/onflow/flow/protobuf/go/flow v0.2.5
