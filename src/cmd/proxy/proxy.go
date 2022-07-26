@@ -3,10 +3,8 @@ package proxy
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net"
-	"os"
 	"strings"
 	"sync"
 	"time"
@@ -16,21 +14,16 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 
-	"github.com/GetElastech/flow-dps/codec/zbor"
-	"github.com/GetElastech/flow-dps/service/invoker"
 	"github.com/onflow/flow/protobuf/go/flow/access"
-	"github.com/rs/zerolog"
 
 	"github.com/onflow/flow-go/engine/access/rpc/backend"
 	"github.com/onflow/flow-go/model/flow"
 	"github.com/onflow/flow-go/utils/grpcutils"
 
 	flowDpsAccess "github.com/GetElastech/flow-dps-access/api"
-	dpsApi "github.com/GetElastech/flow-dps/api/dps"
-	"github.com/spf13/pflag"
 )
 
-func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNodeAddressAndPort flow.IdentityList, timeout time.Duration) (*FlowAPIService, error) {
+func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNodeAddressAndPort flow.IdentityList, flowDpsHostUrl string, flowDpsListenPort string, flowDpsMaxCacheSize uint64, timeout time.Duration) (*FlowAPIService, error) {
 	protocolClients := make([]access.AccessAPIClient, protocolNodeAddressAndPort.Count())
 	for i, identity := range protocolNodeAddressAndPort {
 		identity.NetworkPubKey = nil
@@ -97,47 +90,9 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 		}
 	}
 
-	// Logger initialization.
-	zerolog.TimestampFunc = func() time.Time { return time.Now().UTC() }
-	log := zerolog.New(os.Stderr).With().Timestamp().Logger().Level(zerolog.DebugLevel)
-
-	// Command line parameter initialization.
-	var (
-		flagDpsListenPort string
-		flagHostDpsPort   string
-		flagCache         uint64
-	)
-	pflag.StringVarP(&flagHostDpsPort, "dps", "d", "127.0.0.1:5005", "host port for DPS API endpoint")
-	pflag.Uint64Var(&flagCache, "cache-size", 1_000_000_000, "maximum cache size for register reads in bytes")
-
-	pflag.Parse()
-
-	//Initialize codec.
-	codec := zbor.NewCodec()
-
-	//Initialize the API client.
-	conn, err := grpc.Dial(flagHostDpsPort, grpc.WithInsecure())
+	flowDpsAccessServer, listener, err := NewDpsAccessServer(flowDpsHostUrl, flowDpsListenPort, flowDpsMaxCacheSize)
 	if err != nil {
-		log.Error().Str("dps", flagHostDpsPort).Err(err).Msg("could not dial API host")
-		return nil, errors.New("Failed to initialize grpc client connection")
-	}
-	defer conn.Close()
-
-	client := dpsApi.NewAPIClient(conn)
-	index := dpsApi.IndexFromAPI(client, codec)
-
-	invoke, err := invoker.New(index, invoker.WithCacheSize(flagCache))
-	if err != nil {
-		log.Error().Err(err).Msg("could not initialize script invoker")
-		return nil, errors.New("error initializing script invoker")
-	}
-
-	flowDpsAccessServer := flowDpsAccess.NewServer(index, codec, invoke)
-
-	listener, err := net.Listen("tcp", flagDpsListenPort)
-	if err != nil {
-		log.Error().Str("address", flagDpsListenPort).Err(err).Msg("could not listen")
-		return nil, errors.New("Failed to initialize listener")
+		return nil, err
 	}
 
 	ret := &FlowAPIService{

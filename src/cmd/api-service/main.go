@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/onflow/api-service/m/v2/cmd/api-service/builder"
 	"github.com/onflow/api-service/m/v2/cmd/engine"
 	"github.com/onflow/api-service/m/v2/cmd/proxy"
@@ -36,7 +37,7 @@ func main() {
 				serviceBuilder.ServiceConfig.Logger.Info().Str("Upstream executor", id.Address).Msg("API Service client")
 			}
 
-			serviceBuilder.Api, err = proxy.NewFlowAPIService(protocols, executors, serviceBuilder.ApiTimeout)
+			serviceBuilder.Api, err = proxy.NewFlowAPIService(protocols, executors, serviceBuilder.FlowDpsHostUrl, serviceBuilder.FlowDpsListenPort, serviceBuilder.FlowDpsMaxCacheSize, serviceBuilder.ApiTimeout)
 			if err != nil {
 				serviceBuilder.ServiceConfig.Logger.Info().Err(err)
 				return err
