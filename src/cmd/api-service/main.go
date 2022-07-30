@@ -36,8 +36,15 @@ func main() {
 			for _, id := range executors {
 				serviceBuilder.ServiceConfig.Logger.Info().Str("Upstream executor", id.Address).Msg("API Service client")
 			}
-
-			serviceBuilder.Api, err = proxy.NewFlowAPIService(protocols, executors, serviceBuilder.FlowDpsHostUrl, serviceBuilder.FlowDpsListenPort, serviceBuilder.FlowDpsMaxCacheSize, serviceBuilder.ApiTimeout)
+			dps, err := serviceBuilder.BootstrapIdentities(serviceBuilder.FlowDpsNodeAddresses, serviceBuilder.FlowDpsNodePublicKeys)
+			if err != nil {
+				serviceBuilder.ServiceConfig.Logger.Info().Err(err)
+				return err
+			}
+			for _, id := range dps {
+				serviceBuilder.ServiceConfig.Logger.Info().Str("Upstream dps", id.Address).Msg("DPS API Service client")
+			}
+			serviceBuilder.Api, err = proxy.NewFlowAPIService(protocols, executors, dps, serviceBuilder.FlowDpsMaxCacheSize, serviceBuilder.ApiTimeout)
 			if err != nil {
 				serviceBuilder.ServiceConfig.Logger.Info().Err(err)
 				return err
