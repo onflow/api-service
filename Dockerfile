@@ -1,7 +1,6 @@
 # NOTE: Must be run in the context of the repo's root directory
 
 ## (1) Download a suitable version of Go
-# FIX: We use 1.18 due to unsupported modules
 # FIX: github.com/lucas-clemente/quic-go@v0.24.0/internal/qtls/go118.go:6:13:
 # FIX:   cannot use "quic-go doesn't build on Go 1.18 yet."
 FROM golang:1.18 AS build-setup
@@ -25,9 +24,6 @@ WORKDIR /app/src
 RUN go mod download
 RUN go mod download github.com/onflow/flow-go/crypto@v0.24.3
 RUN cd $GOPATH/pkg/mod/github.com/onflow/flow-go/crypto@v0.24.3 && go generate && go build
-
-# FIX: Devs should review all what they use to limit build time
-RUN cat go.sum
 
 ## (3) Build the app binary
 FROM build-dependencies AS build-env
