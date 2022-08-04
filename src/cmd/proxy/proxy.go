@@ -93,7 +93,7 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 	for i, identity := range flowDpsNodeAddressAndPort {
 		identity.NetworkPubKey = nil
 		if identity.NetworkPubKey == nil {
-			flowDpsAccessServer, err := NewDpsAccessServer(identity.Address, flowDpsMaxCacheSize, false, nil)
+			flowDpsAccessServer, err := NewDpsAccessServer(identity.Address, flowDpsMaxCacheSize, false, nil, timeout)
 			if err != nil {
 				return nil, err
 			}
@@ -106,7 +106,7 @@ func NewFlowAPIService(protocolNodeAddressAndPort flow.IdentityList, executorNod
 				return nil, err
 			}
 
-			flowDpsAccessServer, err := NewDpsAccessServer(identity.Address, flowDpsMaxCacheSize, true, tlsConfig)
+			flowDpsAccessServer, err := NewDpsAccessServer(identity.Address, flowDpsMaxCacheSize, true, tlsConfig, timeout)
 			if err != nil {
 				return nil, err
 			}
