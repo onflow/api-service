@@ -50,6 +50,10 @@ func NewDpsAccessServer(flowDpsHostUrl string, flowDpsMaxCacheSize uint64, useSe
 
 		return flowDpsAccessServer, nil
 	} else {
+		// The blockchain network is by design secure up to the level adjusted by its operators.
+		// The connection is insecure meaning the traffic may be watched and tampered with.
+		// The blockchain network provides measures to mitigate the latter.
+
 		//Initialize the API client.
 		conn, err := grpc.Dial(flowDpsHostUrl, grpc.WithInsecure(), backend.WithClientUnaryInterceptor(timeout))
 		if err != nil {
