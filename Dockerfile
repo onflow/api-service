@@ -65,7 +65,7 @@ FROM golang:1.18 as build-cli-env
 RUN git clone https://github.com/onflow/flow-cli.git /flow-cli
 WORKDIR /flow-cli
 
-# FIX: Let's not gamble and stick to v0.34.0. Backward compatibility can be checked this way.
+# FIX: Let's stick to v0.34.0 to make sure we are backward compatible with legacy clients end to end.
 RUN git checkout 6c240a76ec2bb5d5685afeb0898eed0ea1bd0059
 RUN go mod download
 # FIX: make sure no further steps update modules later, so that we can debug regressions
@@ -96,6 +96,6 @@ CMD ["/bin/bash"]
 
 FROM flow-cli as flow-e2e-test
 
-COPY ./flow-localnet.json /root/flow-localnet.json
+COPY ./resources/flow-localnet.json /root/flow-localnet.json
 WORKDIR /root
 CMD flow -f /root/flow-localnet.json -n flow_api blocks get latest
