@@ -49,10 +49,10 @@ func (fsb *FlowAPIServiceBuilder) Initialize() error {
 	flags.DurationVar(&fsb.ApiTimeout, "flow-api-timeout", 3*time.Second, "tcp timeout of the Flow API gRPC socket")
 	flags.StringSliceVar(&fsb.ProtocolNodeAddresses, "protocol-node-addresses", []string{}, "the network addresses of the bootstrap access nodes e.g. access-001.mainnet.flow.org:9653,access-002.mainnet.flow.org:9653")
 	flags.StringSliceVar(&fsb.ProtocolNodePublicKeys, "protocol-node-public-keys", []string{}, "the networking public key of the bootstrap access nodes (in the same order as the bootstrap node addresses) e.g. \"d57a5e9c5.....\",\"44ded42d....\"")
-	flags.StringSliceVar(&fsb.ExecutionNodeAddresses, "execution-node-addresses", []string{}, "the network addresses of the bootstrap access nodes e.g. access-001.mainnet.flow.org:9653,access-002.mainnet.flow.org:9653")
-	flags.StringSliceVar(&fsb.ExecutionNodePublicKeys, "execution-node-public-keys", []string{}, "the networking public key of the bootstrap access nodes (in the same order as the bootstrap node addresses) e.g. \"d57a5e9c5.....\",\"44ded42d....\"")
+	flags.StringSliceVar(&fsb.ExecutionNodeAddresses, "execution-node-addresses", []string{}, "the network addresses of the bootstrap execution nodes e.g. access-001.mainnet.flow.org:9653,access-002.mainnet.flow.org:9653")
+	flags.StringSliceVar(&fsb.ExecutionNodePublicKeys, "execution-node-public-keys", []string{}, "the networking public key of the bootstrap execution nodes (in the same order as the bootstrap node addresses) e.g. \"d57a5e9c5.....\",\"44ded42d....\"")
 	flags.StringSliceVar(&fsb.FlowDpsNodeAddresses, "flow-dps-node-addresses", []string{}, "the network addresses of the bootstrap flow-dps nodes")
-	flags.StringSliceVar(&fsb.FlowDpsNodePublicKeys, "flow-dps-publish-keys", []string{}, "the networking public key of the bootstrap access nodes (in the same order as the bootstrap node addresses) e.g. \"d57a5e9c5.....\",\"44ded42d....\"")
+	flags.StringSliceVar(&fsb.FlowDpsNodePublicKeys, "flow-dps-publish-keys", []string{}, "the networking public key of the bootstrap flow-dps nodes (in the same order as the bootstrap node addresses) e.g. \"d57a5e9c5.....\",\"44ded42d....\"")
 	flags.Uint64Var(&fsb.FlowDpsMaxCacheSize, "cache-size", 1_000_000_000, "maximum cache size for register reads in flow-dps in bytes")
 
 	// This one just prints the flags

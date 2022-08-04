@@ -17,7 +17,7 @@ func main() {
 		serviceBuilder.ServiceConfig.Logger.Fatal().Err(err).Send()
 	}
 
-	// build dependencies and behavior
+	// build module dependencies and component behavior
 	serviceBuilder.
 		Module("API Service", func(node *srv.ServiceConfig) error {
 			protocols, err := serviceBuilder.BootstrapIdentities(serviceBuilder.ProtocolNodeAddresses, serviceBuilder.ProtocolNodePublicKeys)
@@ -70,11 +70,13 @@ func main() {
 			return nil
 		})
 
+	// Build the service
 	service, err := serviceBuilder.Build()
 	if err != nil {
 		serviceBuilder.ServiceConfig.Logger.Err(err)
 	}
 
+	// Run the service
 	err = service.Run()
 	if err != nil {
 		serviceBuilder.ServiceConfig.Logger.Err(err)

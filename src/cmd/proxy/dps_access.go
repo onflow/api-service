@@ -33,9 +33,9 @@ func NewDpsAccessServer(flowDpsHostUrl string, flowDpsMaxCacheSize uint64, useSe
 		conn, err := grpc.Dial(flowDpsHostUrl, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)), backend.WithClientUnaryInterceptor(timeout))
 		if err != nil {
 			log.Error().Str("dps", flowDpsHostUrl).Err(err).Msg("could not dial API host")
-			return nil, errors.New("Failed to initialize grpc client connection")
+			return nil, errors.New("failed to initialize grpc client connection")
 		}
-		defer conn.Close()
+		defer func() { _ = conn.Close() }()
 
 		client := dpsApi.NewAPIClient(conn)
 		index := dpsApi.IndexFromAPI(client, codec)
@@ -60,7 +60,7 @@ func NewDpsAccessServer(flowDpsHostUrl string, flowDpsMaxCacheSize uint64, useSe
 			log.Error().Str("dps", flowDpsHostUrl).Err(err).Msg("could not dial API host")
 			return nil, errors.New("Failed to initialize grpc client connection")
 		}
-		defer conn.Close()
+		defer func() { _ = conn.Close() }()
 
 		client := dpsApi.NewAPIClient(conn)
 		index := dpsApi.IndexFromAPI(client, codec)

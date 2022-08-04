@@ -8,15 +8,11 @@ go 1.18
 require (
 	github.com/GetElastech/flow-dps v1.4.9-0.20220701214256-b6ea519c29bb
 	github.com/GetElastech/flow-dps-access v0.0.0-20220701221556-10ddedc521f5
-	github.com/golang/protobuf v1.5.2
-	github.com/onflow/cadence v0.21.3-0.20220513161637-08b93d4bb7b9
 	github.com/onflow/flow-go v0.26.0
 	github.com/onflow/flow/protobuf/go/flow v0.2.5
-	github.com/optakt/flow-dps v1.4.8
 	github.com/rs/zerolog v1.26.1
 	github.com/spf13/pflag v1.0.5
 	google.golang.org/grpc v1.44.0
-	google.golang.org/protobuf v1.27.1
 )
 
 require (
@@ -43,6 +39,7 @@ require (
 	github.com/go-test/deep v1.0.5 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/glog v1.0.0 // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.3 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -78,6 +75,7 @@ require (
 	github.com/multiformats/go-multihash v0.1.0 // indirect
 	github.com/multiformats/go-varint v0.0.6 // indirect
 	github.com/onflow/atree v0.3.0 // indirect
+	github.com/onflow/cadence v0.21.3-0.20220513161637-08b93d4bb7b9 // indirect
 	github.com/onflow/flow-core-contracts/lib/go/contracts v0.11.2-0.20220513155751-c4c1f8d59f83 // indirect
 	github.com/onflow/flow-core-contracts/lib/go/templates v0.11.2-0.20220513155751-c4c1f8d59f83 // indirect
 	github.com/onflow/flow-ft/lib/go/contracts v0.5.0 // indirect
@@ -85,6 +83,7 @@ require (
 	github.com/onflow/flow-go/crypto v0.24.3 // indirect
 	github.com/onflow/sdks v0.4.2 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
+	github.com/optakt/flow-dps v1.4.8 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -120,6 +119,7 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220222213610-43724f9ea8cf // indirect
+	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect

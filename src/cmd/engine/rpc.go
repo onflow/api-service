@@ -20,7 +20,7 @@ type Config struct {
 	MaxMsgSize int // In bytes
 }
 
-// RPC implements a gRPC server for the API service node
+// RPC implements a gRPC server for the API service node.
 // The RPC proxy reads from the channel and forwards requests to the gRPC clients
 type RPC struct {
 	unit   *engine.Unit
@@ -76,69 +76,7 @@ func (e *RPC) Done() <-chan struct{} {
 	return e.unit.Done(e.server.GracefulStop)
 }
 
-/*
-// SubmitLocal submits an event originating on the local node.
-func (e *RPC) SubmitLocal(event interface{}) {
-	e.unit.Launch(func() {
-		err := e.process(e.me.NodeID(), event)
-		if err != nil {
-			e.log.Error().Err(err).Msg("could not process submitted event")
-		}
-	})
-}
-
-// Submit submits the given event from the node with the given origin ID
-// for processing in a non-blocking manner. It returns instantly and logs
-// a potential processing error internally when done.
-func (e *RPC) Submit(channel network.Channel, originID flow.Identifier, event interface{}) {
-	e.unit.Launch(func() {
-		err := e.process(originID, event)
-		if err != nil {
-			e.log.Error().Err(err).Msg("could not process submitted event")
-		}
-	})
-}
-
-// ProcessLocal processes an event originating on the local node.
-func (e *RPC) ProcessLocal(event interface{}) error {
-	return e.unit.Do(func() error {
-		return e.process(e.me.NodeID(), event)
-	})
-}
-
-// Process processes the given event from the node with the given origin ID in
-// a blocking manner. It returns the potential processing error when done.
-func (e *RPC) Process(channel network.Channel, originID flow.Identifier, event interface{}) error {
-	return e.unit.Do(func() error {
-		return e.process(originID, event)
-	})
-}
-
-func (e *RPC) process(originID flow.Identifier, event interface{}) error {
-
-	// json encode the message into bytes
-	encodedMsg, err := e.codec.Encode(event)
-	if err != nil {
-		return fmt.Errorf("failed to encode message: %v", err)
-	}
-
-	// create a protobuf message
-	flowMessage := ghost.FlowMessage{
-		SenderID: originID[:],
-		Message:  encodedMsg,
-	}
-
-	// write it to the channel
-	select {
-	case e.messages <- flowMessage:
-	default:
-		return fmt.Errorf("dropping message since queue is full: %v", err)
-	}
-	return nil
-}
-*/
-// serve starts the gRPC server .
-//
+// serve starts the gRPC server.
 // When this function returns, the server is considered ready.
 func (e *RPC) serve() {
 	e.log.Info().Msgf("starting server on address %s", e.config.ListenAddr)
