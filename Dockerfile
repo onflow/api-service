@@ -20,6 +20,7 @@ COPY src/go.sum /app/src
 
 # FIX: This generates code marked by `go:build relic` and `+build relic`. See `combined_verifier_v3.go`.
 # FIX: This is not needed, if vendor/ is used
+# NOTE: this will need to stay updated with the latest stable from flow-go
 WORKDIR /app/src
 RUN go mod download
 RUN go mod download github.com/onflow/flow-go/crypto@v0.24.3
