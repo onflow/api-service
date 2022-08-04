@@ -13,12 +13,14 @@ import (
 	"github.com/GetElastech/flow-dps/service/invoker"
 	"github.com/rs/zerolog"
 
+	"github.com/onflow/flow-go/engine/access/rpc/backend"
+
 	"google.golang.org/grpc/credentials"
 
 	"crypto/tls"
 )
 
-func NewDpsAccessServer(flowDpsHostUrl string, flowDpsMaxCacheSize uint64, useSecure bool, tlsConfig *tls.Config) (*flowDpsAccess.Server, error) {
+func NewDpsAccessServer(flowDpsHostUrl string, flowDpsMaxCacheSize uint64, useSecure bool, tlsConfig *tls.Config, timeout time.Duration) (*flowDpsAccess.Server, error) {
 	// Logger initialization.
 	zerolog.TimestampFunc = func() time.Time { return time.Now().UTC() }
 	log := zerolog.New(os.Stderr).With().Timestamp().Logger().Level(zerolog.DebugLevel)
@@ -28,7 +30,7 @@ func NewDpsAccessServer(flowDpsHostUrl string, flowDpsMaxCacheSize uint64, useSe
 
 	if useSecure {
 		//Initialize the API client.
-		conn, err := grpc.Dial(flowDpsHostUrl, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)), grpc.WithInsecure())
+		conn, err := grpc.Dial(flowDpsHostUrl, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)), backend.WithClientUnaryInterceptor(timeout))
 		if err != nil {
 			log.Error().Str("dps", flowDpsHostUrl).Err(err).Msg("could not dial API host")
 			return nil, errors.New("Failed to initialize grpc client connection")
@@ -49,7 +51,7 @@ func NewDpsAccessServer(flowDpsHostUrl string, flowDpsMaxCacheSize uint64, useSe
 		return flowDpsAccessServer, nil
 	} else {
 		//Initialize the API client.
-		conn, err := grpc.Dial(flowDpsHostUrl, grpc.WithInsecure())
+		conn, err := grpc.Dial(flowDpsHostUrl, grpc.WithInsecure(), backend.WithClientUnaryInterceptor(timeout))
 		if err != nil {
 			log.Error().Str("dps", flowDpsHostUrl).Err(err).Msg("could not dial API host")
 			return nil, errors.New("Failed to initialize grpc client connection")
