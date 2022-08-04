@@ -273,13 +273,18 @@ func (h *FlowAPIService) GetCollectionByID(context context.Context, req *access.
 	// This is a passthrough request
 	upstream, err := h.clientProtocol()
 	if err != nil {
-		return nil, err
+		upstreamDps, err := h.clientDps()
+		if err != nil {
+			return nil, err
+		}
+		return upstreamDps.GetCollectionByID(context, req)
 	}
 	return upstream.GetCollectionByID(context, req)
 }
 
 func (h *FlowAPIService) SendTransaction(context context.Context, req *access.SendTransactionRequest) (*access.SendTransactionResponse, error) {
 	// This is a passthrough request
+	// This is the only execution request that goes to BDS directly being read-write.
 	upstream, err := h.clientProtocol()
 	if err != nil {
 		return nil, err
@@ -289,6 +294,12 @@ func (h *FlowAPIService) SendTransaction(context context.Context, req *access.Se
 
 func (h *FlowAPIService) GetTransaction(context context.Context, req *access.GetTransactionRequest) (*access.TransactionResponse, error) {
 	// This is a passthrough request
+	// We default to DPS by default being read-only. If it fails or not set, we fall back to an execution API provider.
+	// DPS may have a certain delay propagating BDS status.
+	upstreamDPS, err := h.clientDps()
+	if err == nil {
+		return upstreamDPS.GetTransaction(context, req)
+	}
 	upstream, err := h.clientExecution()
 	if err != nil {
 		return nil, err
@@ -298,6 +309,12 @@ func (h *FlowAPIService) GetTransaction(context context.Context, req *access.Get
 
 func (h *FlowAPIService) GetTransactionResult(context context.Context, req *access.GetTransactionRequest) (*access.TransactionResultResponse, error) {
 	// This is a passthrough request
+	// We default to DPS by default being read-only. If it fails or not set, we fall back to an execution API provider.
+	// DPS may have a certain delay propagating BDS status.
+	upstreamDPS, err := h.clientDps()
+	if err == nil {
+		return upstreamDPS.GetTransactionResult(context, req)
+	}
 	upstream, err := h.clientExecution()
 	if err != nil {
 		return nil, err
@@ -307,6 +324,14 @@ func (h *FlowAPIService) GetTransactionResult(context context.Context, req *acce
 
 func (h *FlowAPIService) GetTransactionResultByIndex(context context.Context, req *access.GetTransactionByIndexRequest) (*access.TransactionResultResponse, error) {
 	// This is a passthrough request
+	// We default to DPS by default being read-only. If it fails or not set, we fall back to an execution API provider.
+	// DPS may have a certain delay propagating BDS status.
+	_, err := h.clientDps()
+	if err == nil {
+		// TODO Is this valid still?
+		// We have DPS configured, so error out instead of returning an inconsistent state conflicting with GetTransactionResult
+		return nil, status.Errorf(codes.Unimplemented, "method not implemented")
+	}
 	upstream, err := h.clientExecution()
 	if err != nil {
 		return nil, err
@@ -316,6 +341,12 @@ func (h *FlowAPIService) GetTransactionResultByIndex(context context.Context, re
 
 func (h *FlowAPIService) GetAccount(context context.Context, req *access.GetAccountRequest) (*access.GetAccountResponse, error) {
 	// This is a passthrough request
+	// We default to DPS by default being read-only. If it fails or not set, we fall back to an execution API provider.
+	// DPS may have a certain delay propagating BDS status.
+	upstreamDPS, err := h.clientDps()
+	if err == nil {
+		return upstreamDPS.GetAccount(context, req)
+	}
 	upstream, err := h.clientExecution()
 	if err != nil {
 		return nil, err
@@ -325,6 +356,12 @@ func (h *FlowAPIService) GetAccount(context context.Context, req *access.GetAcco
 
 func (h *FlowAPIService) GetAccountAtLatestBlock(context context.Context, req *access.GetAccountAtLatestBlockRequest) (*access.AccountResponse, error) {
 	// This is a passthrough request
+	// We default to DPS by default being read-only. If it fails or not set, we fall back to an execution API provider.
+	// DPS may have a certain delay propagating BDS status.
+	upstreamDPS, err := h.clientDps()
+	if err == nil {
+		return upstreamDPS.GetAccountAtLatestBlock(context, req)
+	}
 	upstream, err := h.clientExecution()
 	if err != nil {
 		return nil, err
@@ -334,6 +371,12 @@ func (h *FlowAPIService) GetAccountAtLatestBlock(context context.Context, req *a
 
 func (h *FlowAPIService) GetAccountAtBlockHeight(context context.Context, req *access.GetAccountAtBlockHeightRequest) (*access.AccountResponse, error) {
 	// This is a passthrough request
+	// We default to DPS by default being read-only. If it fails or not set, we fall back to an execution API provider.
+	// DPS may have a certain delay propagating BDS status.
+	upstreamDPS, err := h.clientDps()
+	if err == nil {
+		return upstreamDPS.GetAccountAtBlockHeight(context, req)
+	}
 	upstream, err := h.clientExecution()
 	if err != nil {
 		return nil, err
@@ -343,6 +386,12 @@ func (h *FlowAPIService) GetAccountAtBlockHeight(context context.Context, req *a
 
 func (h *FlowAPIService) ExecuteScriptAtLatestBlock(context context.Context, req *access.ExecuteScriptAtLatestBlockRequest) (*access.ExecuteScriptResponse, error) {
 	// This is a passthrough request
+	// We default to DPS by default being read-only. If it fails or not set, we fall back to an execution API provider.
+	// DPS may have a certain delay propagating BDS status.
+	upstreamDPS, err := h.clientDps()
+	if err == nil {
+		return upstreamDPS.ExecuteScriptAtLatestBlock(context, req)
+	}
 	upstream, err := h.clientExecution()
 	if err != nil {
 		return nil, err
@@ -352,6 +401,12 @@ func (h *FlowAPIService) ExecuteScriptAtLatestBlock(context context.Context, req
 
 func (h *FlowAPIService) ExecuteScriptAtBlockID(context context.Context, req *access.ExecuteScriptAtBlockIDRequest) (*access.ExecuteScriptResponse, error) {
 	// This is a passthrough request
+	// We default to DPS by default being read-only. If it fails or not set, we fall back to an execution API provider.
+	// DPS may have a certain delay propagating BDS status.
+	upstreamDPS, err := h.clientDps()
+	if err == nil {
+		return upstreamDPS.ExecuteScriptAtBlockID(context, req)
+	}
 	upstream, err := h.clientExecution()
 	if err != nil {
 		return nil, err
@@ -361,6 +416,12 @@ func (h *FlowAPIService) ExecuteScriptAtBlockID(context context.Context, req *ac
 
 func (h *FlowAPIService) ExecuteScriptAtBlockHeight(context context.Context, req *access.ExecuteScriptAtBlockHeightRequest) (*access.ExecuteScriptResponse, error) {
 	// This is a passthrough request
+	// We default to DPS by default being read-only. If it fails or not set, we fall back to an execution API provider.
+	// DPS may have a certain delay propagating BDS status.
+	upstreamDPS, err := h.clientDps()
+	if err == nil {
+		return upstreamDPS.ExecuteScriptAtBlockHeight(context, req)
+	}
 	upstream, err := h.clientExecution()
 	if err != nil {
 		return nil, err
@@ -370,6 +431,12 @@ func (h *FlowAPIService) ExecuteScriptAtBlockHeight(context context.Context, req
 
 func (h *FlowAPIService) GetEventsForHeightRange(context context.Context, req *access.GetEventsForHeightRangeRequest) (*access.EventsResponse, error) {
 	// This is a passthrough request
+	// We default to DPS by default being read-only. If it fails or not set, we fall back to an execution API provider.
+	// DPS may have a certain delay propagating BDS status.
+	upstreamDPS, err := h.clientDps()
+	if err == nil {
+		return upstreamDPS.GetEventsForHeightRange(context, req)
+	}
 	upstream, err := h.clientExecution()
 	if err != nil {
 		return nil, err
@@ -379,6 +446,12 @@ func (h *FlowAPIService) GetEventsForHeightRange(context context.Context, req *a
 
 func (h *FlowAPIService) GetEventsForBlockIDs(context context.Context, req *access.GetEventsForBlockIDsRequest) (*access.EventsResponse, error) {
 	// This is a passthrough request
+	// We default to DPS by default being read-only. If it fails or not set, we fall back to an execution API provider.
+	// DPS may have a certain delay propagating BDS status.
+	upstreamDPS, err := h.clientDps()
+	if err == nil {
+		return upstreamDPS.GetEventsForBlockIDs(context, req)
+	}
 	upstream, err := h.clientExecution()
 	if err != nil {
 		return nil, err
@@ -386,8 +459,29 @@ func (h *FlowAPIService) GetEventsForBlockIDs(context context.Context, req *acce
 	return upstream.GetEventsForBlockIDs(context, req)
 }
 
+func (h *FlowAPIService) GetExecutionResultForBlockID(context context.Context, req *access.GetExecutionResultForBlockIDRequest) (*access.ExecutionResultForBlockIDResponse, error) {
+	// This is a passthrough request
+	// We default to DPS by default being read-only. If it fails or not set, we fall back to an execution API provider.
+	// DPS may have a certain delay propagating BDS status.
+	upstreamDPS, err := h.clientDps()
+	if err == nil {
+		return upstreamDPS.GetExecutionResultForBlockID(context, req)
+	}
+	upstream, err := h.clientExecution()
+	if err != nil {
+		return nil, err
+	}
+	return upstream.GetExecutionResultForBlockID(context, req)
+}
+
 func (h *FlowAPIService) GetNetworkParameters(context context.Context, req *access.GetNetworkParametersRequest) (*access.GetNetworkParametersResponse, error) {
 	// This is a passthrough request
+	// We default to DPS by default being read-only. If it fails or not set, we fall back to an execution API provider.
+	// DPS may have a certain delay propagating BDS status.
+	upstreamDPS, err := h.clientDps()
+	if err == nil {
+		return upstreamDPS.GetNetworkParameters(context, req)
+	}
 	upstream, err := h.clientExecution()
 	if err != nil {
 		return nil, err
@@ -402,13 +496,4 @@ func (h *FlowAPIService) GetLatestProtocolStateSnapshot(context context.Context,
 		return nil, err
 	}
 	return upstream.GetLatestProtocolStateSnapshot(context, req)
-}
-
-func (h *FlowAPIService) GetExecutionResultForBlockID(context context.Context, req *access.GetExecutionResultForBlockIDRequest) (*access.ExecutionResultForBlockIDResponse, error) {
-	// This is a passthrough request
-	upstream, err := h.clientExecution()
-	if err != nil {
-		return nil, err
-	}
-	return upstream.GetExecutionResultForBlockID(context, req)
 }
