@@ -47,6 +47,7 @@ docker-test-e2e: docker-test-localnet-cleaned
 
 # Stop localnet Flow tests
 docker-test-localnet-cleaned: docker-test-localnet
+	docker stop dps
 	bash -c 'cd upstream/flow-go/integration/localnet && make stop'
 
 # Run API service attached to localnet in Docker
