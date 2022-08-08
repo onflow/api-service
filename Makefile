@@ -72,6 +72,8 @@ docker-test-localnet: docker-run-localnet
 # Run a Flow network in a localnet in Docker
 docker-run-localnet: upstream docker-build
 	bash -c 'cd upstream/flow-go/integration/localnet && make init && make start'
+	bash -c 'cd upstream/flow-dps-emu && make'
+	docker run -d --name dps --rm --link access_1:access --network localnet_default onflow.org/flow-dps-emu
 
 # Install prerequisites
 upstream:
