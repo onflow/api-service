@@ -43,7 +43,7 @@ docker-build-test:
 	docker build -t onflow.org/api-service-test --target build-env .
 
 # Run API service attached to Flow localnet network in Docker
-docker-test-e2e: docker-test-localnet-cleaned
+docker-test-e2e: clean docker-test-localnet-cleaned
 
 # Stop localnet Flow tests
 docker-test-localnet-cleaned: docker-test-localnet
@@ -93,7 +93,8 @@ upstream:
 
 # Clean all images and unused containers
 clean:
-	bash -c 'cd upstream/flow-go/integration/localnet && make stop'
+	bash -c 'docker stop localnet_flow_api_service || true'
+	bash -c 'test -d upstream/flow-go/integration/localnet && cd upstream/flow-go/integration/localnet && make stop'
 	rm -rf upstream
 	docker system prune -a -f
 
