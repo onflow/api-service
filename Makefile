@@ -1,6 +1,6 @@
 
 # All
-all: docker-test-e2e docker-build-test
+all: upstream docker-build
 
 # Build dependencies
 install-tools:
@@ -47,15 +47,19 @@ docker-test-e2e: docker-test-localnet-cleaned
 
 # Stop localnet Flow tests
 docker-test-localnet-cleaned: docker-test-localnet
+	docker stop dps
 	bash -c 'cd upstream/flow-go/integration/localnet && make stop'
 
 # Run API service attached to localnet in Docker
 docker-test-localnet: docker-run-localnet
 	docker run -d --name localnet_flow_api_service --rm -p 127.0.0.1:9500:9000 --network localnet_default \
-	--link access_1:access onflow.org/api-service go run -v -tags=relic cmd/api-service/main.go \
-	--protocol-node-addresses=access:9000 --execution-node-addresses=access:9000 \
+	--link access_1:access --link dps:dps onflow.org/api-service go run -v -tags=relic cmd/api-service/main.go \
+	--protocol-node-addresses=access:9000 \
 	--protocol-node-public-keys=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \
-	--execution-node-public-keys=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa --rpc-addr=:9000
+	--execution-node-addresses=access:9000 \
+	--execution-node-public-keys=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \
+	--dps-node-addresses=dps:9000 \
+	--dps-node-public-keys=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa --rpc-addr=:9000
 	# Wait for an arbitrary but credible amount of time to start up
 	sleep 10
 	# To follow: docker logs -f localnet_flow_api_service
@@ -67,14 +71,29 @@ docker-test-localnet: docker-run-localnet
 	docker stop localnet_flow_api_service
 
 # Run a Flow network in a localnet in Docker
-docker-run-localnet: docker-build
-	# We might want to use testnet
-	git clone https://github.com/onflow/flow-go.git upstream/flow-go || true
-	# git checkout e4b4451c233628969ee321dfd5c0b19a0152fe79
-	bash -c 'cd upstream/flow-go && make install-tools'
+docker-run-localnet: upstream docker-build
 	bash -c 'cd upstream/flow-go/integration/localnet && make init && make start'
+	bash -c 'cd upstream/flow-dps-emu && make'
+	docker run -d --name dps --rm --link access_1:access --network localnet_default onflow.org/flow-dps-emu
+
+# Install prerequisites
+upstream:
+	mkdir -p upstream
+	# We might want to use testnet
+	git clone https://github.com/GetElastech/flow-dps-emu.git upstream/flow-dps-emu || true
+	# Install its prerequisites
+	bash -c 'cd upstream/flow-dps-emu && make upstream'
+
+	#git clone https://github.com/onflow/flow-go.git upstream/flow-go || true
+	# Instead of cloning let's link
+	bash -c 'cd upstream && ln -s flow-dps-emu/upstream/flow-go .'
+
+	# Get crypto libs
+	bash -c 'cd upstream/flow-go && make install-tools'
 
 # Clean all images and unused containers
 clean:
+	bash -c 'cd upstream/flow-go/integration/localnet && make stop'
+	rm -rf upstream
 	docker system prune -a -f
 
