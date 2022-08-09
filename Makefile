@@ -94,7 +94,7 @@ upstream:
 # Clean all images and unused containers
 clean:
 	bash -c 'docker stop localnet_flow_api_service || true'
-	bash -c 'test -d upstream/flow-go/integration/localnet && cd upstream/flow-go/integration/localnet && make stop'
+	bash -c '! test -d upstream/flow-go/integration/localnet || (cd upstream/flow-go/integration/localnet && make stop)'
 	rm -rf upstream
 	docker system prune -a -f
 
