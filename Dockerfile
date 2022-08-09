@@ -1,8 +1,6 @@
 # NOTE: Must be run in the context of the repo's root directory
 
 ## (1) Download a suitable version of Go
-# FIX: github.com/lucas-clemente/quic-go@v0.24.0/internal/qtls/go118.go:6:13:
-# FIX:   cannot use "quic-go doesn't build on Go 1.18 yet."
 FROM golang:1.18 AS build-setup
 
 # Add optional items like apt install -y make cmake gcc g++
@@ -32,7 +30,7 @@ FROM build-dependencies AS build-env
 COPY src /app/src
 WORKDIR /app/src
 
-# Fix: make sure no further steps update modules later, so that we can debug regressions
+# Fix: Make sure no further steps update modules later, so that we can debug regressions by keeping the Docker image
 RUN go mod vendor
 RUN cp -R $GOPATH/pkg/mod/github.com/onflow/flow-go/crypto@v0.24.3/* /app/src/vendor/github.com/onflow/flow-go/crypto
 RUN ls /app/src/vendor/github.com/onflow/flow-go/crypto/relic
@@ -40,9 +38,10 @@ RUN ls /app/src/vendor/github.com/onflow/flow-go/crypto/relic
 # FIX: Without -tags=relic we get undefined: "github.com/onflow/flow-go/consensus/hotstuff/verification".NewCombinedVerifier
 RUN go build -v -tags=relic -o /app cmd/api-service/main.go
 
+# Build environment for go build -tags=relic cmd/api-service/main.go
 CMD /bin/bash
 
-## (5) Add the statically linked binary to a distroless image
+## (4) Add the statically linked binary to a distroless image
 FROM build-env as production
 
 WORKDIR /app/src
@@ -50,7 +49,7 @@ COPY --from=build-env /app/main /app/main
 
 CMD ["go", "run", "-tags=relic", "cmd/api-service/main.go"]
 
-## (6) Add the statically linked binary to a distroless image
+## (5) Add the statically linked binary to a distroless image
 FROM golang:1.18 as production-small
 
 RUN rm -rf /go
@@ -60,6 +59,7 @@ COPY --from=production /app/main /bin/main
 
 CMD ["/bin/main"]
 
+## (6) Flow client build environment for checking backward compatibility
 FROM golang:1.18 as build-cli-env
 
 RUN git clone https://github.com/onflow/flow-cli.git /flow-cli
@@ -71,6 +71,7 @@ RUN go mod download
 # FIX: make sure no further steps update modules later, so that we can debug regressions
 RUN go mod vendor
 
+## (7) Flow client build for checking backward compatibility
 FROM build-cli-env as build-cli
 
 WORKDIR /flow-cli
@@ -85,6 +86,7 @@ RUN VERSION=v0.34.0 \
 
 RUN ./main version
 
+## (8) Very lean Flow client image
 FROM golang:1.18 as flow-cli
 
 RUN rm -rf /go
@@ -94,6 +96,7 @@ COPY --from=build-cli /flow-cli/main /bin/flow
 
 CMD ["/bin/bash"]
 
+## (9) End to end testing client calls
 FROM flow-cli as flow-e2e-test
 
 COPY ./resources/flow-localnet.json /root/flow-localnet.json
