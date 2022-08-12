@@ -102,3 +102,19 @@ FROM flow-cli as flow-e2e-test
 COPY ./resources/flow-localnet.json /root/flow-localnet.json
 WORKDIR /root
 CMD flow -f /root/flow-localnet.json -n flow_api blocks get latest
+
+FROM golang:1.18 as flow-client
+
+#RUN bash -c 'echo {\"networks\": {\"access\": \"127.0.0.1:3569\", \"observer\": \"127.0.0.1:3573\"}} >/go/flow-localnet.json'
+RUN bash -c 'echo {\"networks\": {\"api\":\"127.0.0.1:9500\", \"flow_api\":\"flow_api:9000\", \"access\": \"127.0.0.1:3571\", \"observer\": \"127.0.0.1:3569i\"}} >/go/flow-localnet.json'
+RUN bash -c 'printf "pub fun main(greeting: String, who: String): String\n{\n return greeting.concat(\" \").concat(who)\n}\n" >/go/hello.cdc'
+
+WORKDIR /go
+RUN curl -L https://github.com/onflow/flow-cli/archive/refs/tags/v0.36.2.tar.gz | tar -xzv
+RUN cd flow-cli-0.36.2 && go mod download
+RUN cd flow-cli-0.36.2 && make
+RUN /go/flow-cli-0.36.2/cmd/flow/flow version
+RUN cp /go/flow-cli-0.36.2/cmd/flow/flow /go/flow
+
+CMD ["/go/flow", "-f", "/go/flow-localnet.json", "-n", "flow_api", "scripts", "execute", "hello.cdc", "Hello", "World!"]
+
