@@ -53,7 +53,7 @@ docker-test-localnet-cleaned: docker-test-localnet
 # Run API service attached to localnet in Docker
 docker-test-localnet: docker-run-localnet
 	# Start a DPS instance
-	docker run -d --name localnet_dps --rm --link access_1:access --network localnet_default onflow.org/flow-dps-emu
+	docker run -d --name localnet_dps --rm -p 127.0.0.1:9555:9000 --link localnet_access_1_1:access --network localnet_default onflow.org/flow-dps-emu
 	# Wait for an arbitrary but credible amount of time to start up
 	sleep 3
 	# Start an API service
@@ -64,8 +64,8 @@ docker-test-localnet: docker-run-localnet
 	--protocol-node-public-keys=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \
 	--execution-node-addresses=access:9000 \
 	--execution-node-public-keys=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \
-	#--dps-node-addresses=dps:9000 \
-	#--dps-node-public-keys=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \
+	--dps-node-addresses=dps:9000 \
+	--dps-node-public-keys=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \
 
 	# Wait for an arbitrary but credible amount of time to start up
 	sleep 10
