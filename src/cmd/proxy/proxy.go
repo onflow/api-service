@@ -199,7 +199,10 @@ func (h *FlowAPIService) GetLatestBlockHeader(context context.Context, req *acce
 		if err != nil {
 			return nil, err
 		}
-		return upstreamDps.GetLatestBlockHeader(context, req)
+		ret, err := upstreamDps.GetLatestBlockHeader(context, req)
+		if err == nil {
+			return ret, err
+		}
 	}
 	return upstream.GetLatestBlockHeader(context, req)
 }
@@ -212,7 +215,11 @@ func (h *FlowAPIService) GetBlockHeaderByID(context context.Context, req *access
 		if err != nil {
 			return nil, err
 		}
-		return upstreamDps.GetBlockHeaderByID(context, req)
+		ret, err := upstreamDps.GetBlockHeaderByID(context, req)
+		if err == nil {
+			return ret, err
+		}
+
 	}
 	return upstream.GetBlockHeaderByID(context, req)
 }
@@ -225,7 +232,11 @@ func (h *FlowAPIService) GetBlockHeaderByHeight(context context.Context, req *ac
 		if err != nil {
 			return nil, err
 		}
-		return upstreamDps.GetBlockHeaderByHeight(context, req)
+		ret, err := upstreamDps.GetBlockHeaderByHeight(context, req)
+		if err == nil {
+			return ret, err
+		}
+
 	}
 	return upstream.GetBlockHeaderByHeight(context, req)
 }
@@ -238,7 +249,11 @@ func (h *FlowAPIService) GetLatestBlock(context context.Context, req *access.Get
 		if err != nil {
 			return nil, err
 		}
-		return upstreamDps.GetLatestBlock(context, req)
+		ret, err := upstreamDps.GetLatestBlock(context, req)
+		if err == nil {
+			return ret, err
+		}
+
 	}
 	return upstream.GetLatestBlock(context, req)
 }
@@ -251,7 +266,11 @@ func (h *FlowAPIService) GetBlockByID(context context.Context, req *access.GetBl
 		if err != nil {
 			return nil, err
 		}
-		return upstreamDps.GetBlockByID(context, req)
+		ret, err := upstreamDps.GetBlockByID(context, req)
+		if err == nil {
+			return ret, err
+		}
+
 	}
 	return upstream.GetBlockByID(context, req)
 }
@@ -264,7 +283,11 @@ func (h *FlowAPIService) GetBlockByHeight(context context.Context, req *access.G
 		if err != nil {
 			return nil, err
 		}
-		return upstreamDps.GetBlockByHeight(context, req)
+		ret, err := upstreamDps.GetBlockByHeight(context, req)
+		if err == nil {
+			return ret, err
+		}
+
 	}
 	return upstream.GetBlockByHeight(context, req)
 }
@@ -277,7 +300,11 @@ func (h *FlowAPIService) GetCollectionByID(context context.Context, req *access.
 		if err != nil {
 			return nil, err
 		}
-		return upstreamDps.GetCollectionByID(context, req)
+		ret, err := upstreamDps.GetCollectionByID(context, req)
+		if err == nil {
+			return ret, err
+		}
+
 	}
 	return upstream.GetCollectionByID(context, req)
 }
@@ -298,7 +325,10 @@ func (h *FlowAPIService) GetTransaction(context context.Context, req *access.Get
 	// DPS may have a certain delay propagating BDS status.
 	upstreamDPS, err := h.clientDps()
 	if err == nil {
-		return upstreamDPS.GetTransaction(context, req)
+		ret, err := upstreamDPS.GetTransaction(context, req)
+		if err == nil {
+			return ret, err
+		}
 	}
 	upstream, err := h.clientExecution()
 	if err != nil {
@@ -313,7 +343,10 @@ func (h *FlowAPIService) GetTransactionResult(context context.Context, req *acce
 	// DPS may have a certain delay propagating BDS status.
 	upstreamDPS, err := h.clientDps()
 	if err == nil {
-		return upstreamDPS.GetTransactionResult(context, req)
+		ret, err := upstreamDPS.GetTransactionResult(context, req)
+		if err == nil {
+			return ret, err
+		}
 	}
 	upstream, err := h.clientExecution()
 	if err != nil {
@@ -345,7 +378,10 @@ func (h *FlowAPIService) GetAccount(context context.Context, req *access.GetAcco
 	// DPS may have a certain delay propagating BDS status.
 	upstreamDPS, err := h.clientDps()
 	if err == nil {
-		return upstreamDPS.GetAccount(context, req)
+		ret, err := upstreamDPS.GetAccount(context, req)
+		if err == nil {
+			return ret, err
+		}
 	}
 	upstream, err := h.clientExecution()
 	if err != nil {
@@ -360,7 +396,10 @@ func (h *FlowAPIService) GetAccountAtLatestBlock(context context.Context, req *a
 	// DPS may have a certain delay propagating BDS status.
 	upstreamDPS, err := h.clientDps()
 	if err == nil {
-		return upstreamDPS.GetAccountAtLatestBlock(context, req)
+		ret, err := upstreamDPS.GetAccountAtLatestBlock(context, req)
+		if err == nil {
+			return ret, err
+		}
 	}
 	upstream, err := h.clientExecution()
 	if err != nil {
@@ -375,7 +414,10 @@ func (h *FlowAPIService) GetAccountAtBlockHeight(context context.Context, req *a
 	// DPS may have a certain delay propagating BDS status.
 	upstreamDPS, err := h.clientDps()
 	if err == nil {
-		return upstreamDPS.GetAccountAtBlockHeight(context, req)
+		ret, err := upstreamDPS.GetAccountAtBlockHeight(context, req)
+		if err == nil {
+			return ret, err
+		}
 	}
 	upstream, err := h.clientExecution()
 	if err != nil {
@@ -390,7 +432,10 @@ func (h *FlowAPIService) ExecuteScriptAtLatestBlock(context context.Context, req
 	// DPS may have a certain delay propagating BDS status.
 	upstreamDPS, err := h.clientDps()
 	if err == nil {
-		return upstreamDPS.ExecuteScriptAtLatestBlock(context, req)
+		ret, err := upstreamDPS.ExecuteScriptAtLatestBlock(context, req)
+		if err == nil {
+			return ret, err
+		}
 	}
 	upstream, err := h.clientExecution()
 	if err != nil {
@@ -405,7 +450,10 @@ func (h *FlowAPIService) ExecuteScriptAtBlockID(context context.Context, req *ac
 	// DPS may have a certain delay propagating BDS status.
 	upstreamDPS, err := h.clientDps()
 	if err == nil {
-		return upstreamDPS.ExecuteScriptAtBlockID(context, req)
+		ret, err := upstreamDPS.ExecuteScriptAtBlockID(context, req)
+		if err == nil {
+			return ret, err
+		}
 	}
 	upstream, err := h.clientExecution()
 	if err != nil {
@@ -420,7 +468,10 @@ func (h *FlowAPIService) ExecuteScriptAtBlockHeight(context context.Context, req
 	// DPS may have a certain delay propagating BDS status.
 	upstreamDPS, err := h.clientDps()
 	if err == nil {
-		return upstreamDPS.ExecuteScriptAtBlockHeight(context, req)
+		ret, err := upstreamDPS.ExecuteScriptAtBlockHeight(context, req)
+		if err == nil {
+			return ret, err
+		}
 	}
 	upstream, err := h.clientExecution()
 	if err != nil {
@@ -435,7 +486,10 @@ func (h *FlowAPIService) GetEventsForHeightRange(context context.Context, req *a
 	// DPS may have a certain delay propagating BDS status.
 	upstreamDPS, err := h.clientDps()
 	if err == nil {
-		return upstreamDPS.GetEventsForHeightRange(context, req)
+		ret, err := upstreamDPS.GetEventsForHeightRange(context, req)
+		if err == nil {
+			return ret, err
+		}
 	}
 	upstream, err := h.clientExecution()
 	if err != nil {
@@ -450,7 +504,10 @@ func (h *FlowAPIService) GetEventsForBlockIDs(context context.Context, req *acce
 	// DPS may have a certain delay propagating BDS status.
 	upstreamDPS, err := h.clientDps()
 	if err == nil {
-		return upstreamDPS.GetEventsForBlockIDs(context, req)
+		ret, err := upstreamDPS.GetEventsForBlockIDs(context, req)
+		if err == nil {
+			return ret, err
+		}
 	}
 	upstream, err := h.clientExecution()
 	if err != nil {
@@ -465,8 +522,12 @@ func (h *FlowAPIService) GetExecutionResultForBlockID(context context.Context, r
 	// DPS may have a certain delay propagating BDS status.
 	upstreamDPS, err := h.clientDps()
 	if err == nil {
-		return upstreamDPS.GetExecutionResultForBlockID(context, req)
+		ret, err := upstreamDPS.GetExecutionResultForBlockID(context, req)
+		if err == nil {
+			return ret, err
+		}
 	}
+
 	upstream, err := h.clientExecution()
 	if err != nil {
 		return nil, err
@@ -480,7 +541,10 @@ func (h *FlowAPIService) GetNetworkParameters(context context.Context, req *acce
 	// DPS may have a certain delay propagating BDS status.
 	upstreamDPS, err := h.clientDps()
 	if err == nil {
-		return upstreamDPS.GetNetworkParameters(context, req)
+		ret, err := upstreamDPS.GetNetworkParameters(context, req)
+		if err == nil {
+			return ret, err
+		}
 	}
 	upstream, err := h.clientExecution()
 	if err != nil {
