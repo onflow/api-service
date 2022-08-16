@@ -37,6 +37,7 @@ docker-build:
 	docker build -t onflow.org/api-service-small --target production-small .
 	docker build -t onflow.org/flow-cli --target flow-cli .
 	docker build -t onflow.org/flow-e2e-test --target flow-e2e-test .
+	docker build -t onflow.org/flow-client-execution --target flow-client .
 
 # Build intermediate build docker container
 docker-build-test:
@@ -52,18 +53,19 @@ docker-test-localnet-cleaned: docker-test-localnet
 # Run API service attached to localnet in Docker
 docker-test-localnet: docker-run-localnet
 	# Start a DPS instance
-	docker run -d --name localnet_dps --rm --link access_1:access --network localnet_default onflow.org/flow-dps-emu
+	docker run -d --name localnet_dps --rm -p 127.0.0.1:9555:9000 --link localnet_access_1_1:access --network localnet_default onflow.org/flow-dps-emu
 	# Wait for an arbitrary but credible amount of time to start up
 	sleep 3
 	# Start an API service
 	docker run -d --name localnet_flow_api_service --rm -p 127.0.0.1:9500:9000 --network localnet_default \
-	--link access_1:access --link dps:dps onflow.org/api-service go run -v -tags=relic cmd/api-service/main.go \
+	--link access_1:access --link localnet_dps:dps onflow.org/api-service go run -v -tags=relic cmd/api-service/main.go \
+	--rpc-addr=:9000 \
 	--protocol-node-addresses=access:9000 \
 	--protocol-node-public-keys=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \
 	--execution-node-addresses=access:9000 \
 	--execution-node-public-keys=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \
 	--dps-node-addresses=dps:9000 \
-	--dps-node-public-keys=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa --rpc-addr=:9000
+	--dps-node-public-keys=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \
 
 	# Wait for an arbitrary but credible amount of time to start up
 	sleep 10
@@ -72,6 +74,9 @@ docker-test-localnet: docker-run-localnet
 	# Check latest block: flow -f ./resources/flow-localnet.json -n api blocks get latest
 	docker run --rm --link localnet_flow_api_service:flow_api  --network localnet_default \
 		onflow.org/flow-e2e-test
+	# Run an execution test
+	docker run --rm --link localnet_flow_api_service:flow_api  --network localnet_default \
+		onflow.org/flow-client-execution
 	# Stop the API service created above
 	docker stop localnet_flow_api_service
 	docker stop localnet_dps
